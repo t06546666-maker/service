@@ -1,0 +1,39 @@
+.homa-categories {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+.homa-cat-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.homa-cat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 120px;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #f1f5f9;
+}
+.homa-cat-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+}
+.homa-cat-icon {
+  font-size: 1.5rem;
+  color: var(--secondary);
+}
+.homa-cat-item p {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.95rem;
+}

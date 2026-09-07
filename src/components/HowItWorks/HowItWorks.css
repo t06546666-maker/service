@@ -1,0 +1,45 @@
+.homa-hiw {
+  padding: 4rem 1.5rem;
+  background: white;
+}
+.homa-hiw-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.homa-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 3rem;
+}
+.homa-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+.homa-step-card {
+  padding-right: 1rem;
+}
+.homa-step-icon {
+  font-size: 1.5rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+.homa-step-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--secondary);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.homa-step-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+.homa-step-desc {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+}
