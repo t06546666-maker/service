@@ -5,16 +5,29 @@ import Hero from './components/Hero/Hero';
 import Categories from './components/Categories/Categories';
 import HowItWorks from './components/HowItWorks/HowItWorks';
 import FeaturedServices from './components/FeaturedServices/FeaturedServices';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import WorkersList from './pages/Workers/WorkersList';
+import AdminDashboard from './pages/Admin/AdminDashboard';
 
 function App() {
   return (
-    <div className="app-container">
-      <Navbar />
-      <Hero />
-      <Categories />
-      <HowItWorks />
-      <FeaturedServices />
-    </div>
+    <Router>
+      <div className="app-container">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={
+            <>
+              <Hero />
+              <Categories />
+              <HowItWorks />
+              <FeaturedServices />
+            </>
+          } />
+          <Route path="/workers" element={<WorkersList />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
