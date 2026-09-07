@@ -29,7 +29,7 @@ if (window.location.hostname === "localhost") {
 }
 
 const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_V3_SITE_KEY_HERE'),
+  provider: new ReCaptchaV3Provider('6LdLRK4tAAAAALnGcPs8JL6SygArxoHjKrriOIOZ'),
   isTokenAutoRefreshEnabled: true
 });
 
