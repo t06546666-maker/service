@@ -114,12 +114,11 @@ export default function SignUp() {
         </div>
       </div>
       
-      <div className="auth-right" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop')" }}>
+      <div className="auth-right" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1000&auto=format&fit=crop')" }}>
         <div className="testimonial-box">
           <div className="quote-icon">“</div>
           <p className="testimonial-text">
-            Seamless booking experience! The app makes finding and reserving professionals so easy. 
-            I loved the instant confirmation and personalized recommendations. Definitely my go-to for all future needs.
+            Joining this platform was the best decision! It's incredibly intuitive and gives me access to top-tier professionals instantly.
           </p>
           <div className="testimonial-author">
             <div className="author-avatar">J</div>
