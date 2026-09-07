@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../../firebase';
 import './Auth.css'; 
 
 export default function SignUp() {
   const [role, setRole] = useState('user');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,7 +19,20 @@ export default function SignUp() {
     e.preventDefault();
     setError('');
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Save additional customer details to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName,
+        lastName,
+        name: `${firstName} ${lastName}`.trim(),
+        phoneNumber: phone,
+        email,
+        role,
+        createdAt: new Date().toISOString()
+      });
+
       // Redirect based on role or just to home
       if (role === 'admin') {
         navigate('/admin');
@@ -76,6 +93,49 @@ export default function SignUp() {
           {error && <div className="auth-error">{error}</div>}
 
           <form onSubmit={handleSignUp} className="auth-form">
+            <div className="form-row">
+              <div className="input-group">
+                <label>First Name *</label>
+                <div className="input-with-icon">
+                  <span className="input-icon">👤</span>
+                  <input 
+                    type="text" 
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Jane" 
+                    required 
+                  />
+                </div>
+              </div>
+              <div className="input-group">
+                <label>Last Name *</label>
+                <div className="input-with-icon">
+                  <span className="input-icon">👤</span>
+                  <input 
+                    type="text" 
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe" 
+                    required 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Phone Number *</label>
+              <div className="input-with-icon">
+                <span className="input-icon">📱</span>
+                <input 
+                  type="tel" 
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 123-4567" 
+                  required 
+                />
+              </div>
+            </div>
+
             <div className="input-group">
               <label>Email *</label>
               <div className="input-with-icon">
