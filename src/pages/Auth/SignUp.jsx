@@ -47,8 +47,15 @@ export default function SignUp() {
         navigate('/');
       }
     } catch (err) {
-      console.error(err);
-      setError(err.message || 'Error creating account.');
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please sign in instead.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password should be at least 6 characters.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else {
+        setError('Error creating account. Please try again.');
+      }
     }
   };
 
