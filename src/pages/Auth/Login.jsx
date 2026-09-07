@@ -60,7 +60,7 @@ export default function Login() {
 
           <div className="social-login">
             <button className="social-btn" onClick={() => alert("Google login not configured yet")}>
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
               Sign in with Google
             </button>
             <button className="social-btn" onClick={() => alert("Apple login not configured yet")}>

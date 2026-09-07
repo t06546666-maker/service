@@ -60,7 +60,7 @@ export default function SignUp() {
 
           <div className="social-login">
             <button className="social-btn" onClick={() => alert("Google signup not configured yet")}>
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
               Sign up with Google
             </button>
             <button className="social-btn" onClick={() => alert("Apple signup not configured yet")}>
