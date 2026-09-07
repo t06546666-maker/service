@@ -46,6 +46,11 @@
   color: #991b1b;
 }
 
+.status-message.info {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
 .add-worker-form {
   display: flex;
   flex-direction: column;

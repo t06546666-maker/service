@@ -1,16 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, onSnapshot, query, limit } from 'firebase/firestore';
+import { db } from '../../firebase';
 import './FeaturedServices.css';
 
 export default function FeaturedServices() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [favorites, setFavorites] = useState(new Set());
 
-  const services = [
-    { id: 1, name: 'Sydie Christ...', job: 'Plumber', rating: 4.8, reviews: 280, price: '$50.00 / hr', distance: '2.4 km', img: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?q=80&w=200&auto=format&fit=crop' },
-    { id: 2, name: 'Alejandro G.', job: 'Plumber', rating: 4.8, reviews: 30, price: '$35.00 / hr', distance: '12 km', img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=200&auto=format&fit=crop' },
-    { id: 3, name: 'Yusuf O.', job: 'Home service', rating: 4.9, reviews: 112, price: '$50.00 / hr', distance: '10 km', img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=200&auto=format&fit=crop' },
-    { id: 4, name: 'Bernard David', job: 'Home service', rating: 4.7, reviews: 140, price: '$40.00 / hr', distance: '5 km', img: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?q=80&w=200&auto=format&fit=crop' }
-  ];
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedWorker, setSelectedWorker] = useState(null);
+
+  useEffect(() => {
+    // Optionally we can use query(collection(db, "workers"), limit(4)) to only show 4 on the homepage
+    const q = query(collection(db, "workers"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const workersData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setServices(workersData);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching featured services: ", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const toggleFavorite = (id) => {
     setFavorites(prev => {
@@ -24,7 +41,7 @@ export default function FeaturedServices() {
     });
   };
 
-  const filteredServices = services.filter(svc => activeFilter === 'All' || svc.job === activeFilter);
+  const filteredServices = services.filter(svc => activeFilter === 'All' || svc.category === activeFilter);
 
   const filters = ['All', 'Home service', 'Electricity', 'Handcraft', 'Plumber', 'Mechanic'];
 
@@ -47,11 +64,14 @@ export default function FeaturedServices() {
 
           <div className="homa-services-grid">
             {filteredServices.length > 0 ? filteredServices.map((svc) => (
-              <div key={svc.id} className="homa-service-card">
-                <div className="homa-service-img" style={{backgroundImage: `url(${svc.img})`}}>
+              <div key={svc.id} className="homa-service-card" onClick={() => setSelectedWorker(svc)}>
+                <div className="homa-service-img" style={{backgroundImage: `url(${svc.img || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=200&auto=format&fit=crop'})`}}>
                   <button 
                     className="homa-heart-btn"
-                    onClick={() => toggleFavorite(svc.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(svc.id);
+                    }}
                     style={{ color: favorites.has(svc.id) ? '#ef4444' : 'inherit' }}
                   >
                     {favorites.has(svc.id) ? '❤️' : '🤍'}
@@ -60,12 +80,12 @@ export default function FeaturedServices() {
                 <div className="homa-service-info">
                   <div className="homa-service-title-row">
                     <h4>{svc.name}</h4>
-                    <div className="homa-rating">⭐ {svc.rating} <span className="text-muted">({svc.reviews})</span></div>
+                    <div className="homa-rating">⭐ {svc.rating || 'New'} <span className="text-muted">({svc.reviews || 0})</span></div>
                   </div>
-                  <p className="homa-service-job">{svc.job}</p>
+                  <p className="homa-service-job">{svc.category}</p>
                   <div className="homa-service-bottom">
-                    <span className="homa-price text-blue">{svc.price}</span>
-                    <span className="homa-distance text-muted">📍 {svc.distance}</span>
+                    <span className="homa-price text-blue">📞 {svc.phoneNumber}</span>
+                    <span className="homa-distance text-muted">📍 {svc.distance || 'Local'}</span>
                   </div>
                 </div>
               </div>
@@ -78,6 +98,33 @@ export default function FeaturedServices() {
             <button className="homa-view-all-btn" onClick={() => alert('View all services clicked!')}>View all</button>
           </div>
         </div>
+
+        {selectedWorker && (
+          <div className="worker-modal-overlay" onClick={() => setSelectedWorker(null)}>
+            <div className="worker-modal-content" onClick={e => e.stopPropagation()}>
+              <button className="close-modal-btn" onClick={() => setSelectedWorker(null)}>×</button>
+              <div className="modal-header">
+                <div className="modal-avatar">
+                  {selectedWorker.name ? selectedWorker.name.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div>
+                  <h2>{selectedWorker.name}</h2>
+                  <span className="worker-category">{selectedWorker.category}</span>
+                </div>
+              </div>
+              <div className="modal-body">
+                <p><strong>Rating:</strong> ⭐ {selectedWorker.rating || 'New'} ({selectedWorker.reviews || 0} reviews)</p>
+                <p><strong>Phone:</strong> {selectedWorker.phoneNumber}</p>
+                <button className="homa-view-all-btn" style={{marginTop: '1.5rem', width: '100%'}} onClick={() => {
+                  alert(`Booking ${selectedWorker.name}`);
+                  setSelectedWorker(null);
+                }}>
+                  Contact Professional
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </section>
   );
 }

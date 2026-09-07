@@ -46,7 +46,7 @@ export default function AddWorker() {
         <h2>Add New Worker</h2>
         <p>Enter the professional's details below to add them to the directory.</p>
         
-        {status && <div className={`status-message ${status.includes('Success') ? 'success' : 'error'}`}>{status}</div>}
+        {status && <div className={`status-message ${status.includes('Success') ? 'success' : (status === 'Submitting...' ? 'info' : 'error')}`}>{status}</div>}
         
         <form onSubmit={handleSubmit} className="add-worker-form">
           <div className="form-group">
