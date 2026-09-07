@@ -47,3 +47,30 @@
   padding: 0.5rem 1.25rem;
   border-radius: 999px;
 }
+
+.homa-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.homa-greeting {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.homa-btn-logout {
+  background-color: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.homa-btn-logout:hover {
+  background-color: #fef2f2;
+}
