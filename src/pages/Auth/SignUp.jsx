@@ -12,12 +12,19 @@ export default function SignUp() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -151,7 +158,7 @@ export default function SignUp() {
             </div>
 
             <div className="input-group">
-              <label>Password *</label>
+              <label>Create Password *</label>
               <div className="input-with-icon">
                 <span className="input-icon">🔒</span>
                 <input 
@@ -159,6 +166,21 @@ export default function SignUp() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password" 
+                  required 
+                  minLength="6"
+                />
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Confirm Password *</label>
+              <div className="input-with-icon">
+                <span className="input-icon">🔒</span>
+                <input 
+                  type="password" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password" 
                   required 
                   minLength="6"
                 />
