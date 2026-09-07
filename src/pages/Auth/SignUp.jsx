@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebase';
+import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db, googleProvider } from '../../firebase';
 import './Auth.css'; 
 
 export default function SignUp() {
@@ -59,6 +59,42 @@ export default function SignUp() {
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    setError('');
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Check if user already has a document (in case they previously signed up)
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        // Create new user profile from Google data
+        await setDoc(userDocRef, {
+          name: user.displayName || 'Google User',
+          email: user.email,
+          role: role, // use the radio button role they selected
+          phoneNumber: user.phoneNumber || '', // Google rarely provides phone
+          createdAt: new Date().toISOString()
+        });
+      }
+      
+      // Redirect based on selected role or existing role
+      const finalRole = userDocSnap.exists() ? userDocSnap.data().role : role;
+      
+      if (finalRole === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+
+    } catch (err) {
+      console.error(err);
+      setError('Google Sign-Up failed. Please try again.');
+    }
+  };
+
   return (
     <div className="auth-page">
       <div className="auth-left">
@@ -90,7 +126,7 @@ export default function SignUp() {
           </div>
 
           <div className="social-login">
-            <button className="social-btn" onClick={() => alert("Google signup not configured yet")}>
+            <button className="social-btn" onClick={handleGoogleSignUp}>
               <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
               Sign up with Google
             </button>

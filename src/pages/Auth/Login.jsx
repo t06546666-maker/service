@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db, googleProvider } from '../../firebase';
 import './Auth.css'; // Shared CSS for both Login and SignUp
 
 export default function Login() {
-  const [role, setRole] = useState('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,16 +15,54 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Redirect based on role or just to home
-      if (role === 'admin') {
-        navigate('/admin');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Fetch user profile from Firestore to determine role
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       } else {
+        // Fallback if no document exists
         navigate('/');
       }
     } catch (err) {
       console.error(err);
       setError('Invalid email or password.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Fetch user profile from Firestore to determine role
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      } else {
+        // Fallback if no document exists
+        navigate('/');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Google Sign-In failed. Please try again.');
     }
   };
 
@@ -37,29 +75,8 @@ export default function Login() {
             <p>Welcome back! Please enter your details to continue</p>
           </div>
 
-          <div className="role-selector">
-            <label className="radio-label">
-              <input 
-                type="radio" 
-                checked={role === 'user'} 
-                onChange={() => setRole('user')} 
-              />
-              <span className="radio-custom"></span>
-              As a User
-            </label>
-            <label className="radio-label">
-              <input 
-                type="radio" 
-                checked={role === 'admin'} 
-                onChange={() => setRole('admin')} 
-              />
-              <span className="radio-custom"></span>
-              As a Professional
-            </label>
-          </div>
-
           <div className="social-login">
-            <button className="social-btn" onClick={() => alert("Google login not configured yet")}>
+            <button className="social-btn" onClick={handleGoogleLogin}>
               <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
               Sign in with Google
             </button>
