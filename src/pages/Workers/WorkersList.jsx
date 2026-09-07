@@ -79,9 +79,25 @@ export default function WorkersList() {
               </div>
             </div>
             <div className="modal-body">
-              <p><strong>Rating:</strong> ⭐ {selectedWorker.rating || 'No ratings yet'} ({selectedWorker.reviews || 0} reviews)</p>
-              <p><strong>Phone:</strong> {selectedWorker.phoneNumber}</p>
-              {/* Future fields can be added here */}
+              {selectedWorker.bio && <p className="worker-bio">"{selectedWorker.bio}"</p>}
+              
+              <div className="modal-stats">
+                <p><strong>Rating:</strong> ⭐ {selectedWorker.rating || 'No ratings yet'} ({selectedWorker.reviews || 0} reviews)</p>
+                {selectedWorker.hourlyRate && <p><strong>Rate:</strong> ${selectedWorker.hourlyRate}/hr</p>}
+                <p><strong>Phone:</strong> {selectedWorker.phoneNumber}</p>
+              </div>
+
+              {selectedWorker.portfolioImages && selectedWorker.portfolioImages.length > 0 && (
+                <div className="modal-portfolio">
+                  <h3>Portfolio</h3>
+                  <div className="portfolio-grid">
+                    {selectedWorker.portfolioImages.map((img, idx) => (
+                      <img key={idx} src={img} alt={`Work ${idx + 1}`} className="portfolio-thumbnail" />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <button className="book-btn modal-book-btn" onClick={() => {
                 alert(`Booking ${selectedWorker.name}`);
                 setSelectedWorker(null);

@@ -7,7 +7,7 @@ import HowItWorks from './components/HowItWorks/HowItWorks';
 import FeaturedServices from './components/FeaturedServices/FeaturedServices';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import WorkersList from './pages/Workers/WorkersList';
-import AdminDashboard from './pages/Admin/AdminDashboard';
+import ProfessionalDashboard from './pages/Admin/ProfessionalDashboard';
 import Login from './pages/Auth/Login';
 import SignUp from './pages/Auth/SignUp';
 
@@ -26,7 +26,7 @@ function App() {
             </>
           } />
           <Route path="/workers" element={<WorkersList />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<ProfessionalDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
         </Routes>
