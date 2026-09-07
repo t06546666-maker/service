@@ -2,21 +2,33 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
-import './Auth.css'; 
+import './SignUp.css'; 
 
 export default function SignUp() {
   const [role, setRole] = useState('user');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (!termsAccepted) {
+      setError('You must agree to the Terms of Use to continue.');
+      return;
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      // Redirect based on role or just to home
+      // In a real app, we would also save the firstName, lastName, phone, and role 
+      // into a Firestore "users" or "professionals" collection here.
+      
       if (role === 'admin') {
         navigate('/admin');
       } else {
@@ -29,104 +41,132 @@ export default function SignUp() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-left">
-        <div className="auth-form-container">
-          <div className="auth-header">
-            <h1>Create Account</h1>
-            <p>Welcome! Please enter your details to register</p>
+    <div className="signup-layout">
+      {/* Left Information Panel */}
+      <div className="signup-left">
+        <div className="signup-left-top">
+          <div className="signup-brand">
+            <h2>Create your KL09 account</h2>
           </div>
-
-          <div className="role-selector">
-            <label className="radio-label">
-              <input 
-                type="radio" 
-                checked={role === 'user'} 
-                onChange={() => setRole('user')} 
-              />
-              <span className="radio-custom"></span>
-              As a User
-            </label>
-            <label className="radio-label">
-              <input 
-                type="radio" 
-                checked={role === 'admin'} 
-                onChange={() => setRole('admin')} 
-              />
-              <span className="radio-custom"></span>
-              As a Professional
-            </label>
-          </div>
-
-          <div className="social-login">
-            <button className="social-btn" onClick={() => alert("Google signup not configured yet")}>
-              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
-              Sign up with Google
-            </button>
-            <button className="social-btn" onClick={() => alert("Apple signup not configured yet")}>
-              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" />
-              Sign up with Apple
-            </button>
-          </div>
-
-          <div className="auth-divider">
-            <span>Or</span>
-          </div>
-
-          {error && <div className="auth-error">{error}</div>}
-
-          <form onSubmit={handleSignUp} className="auth-form">
-            <div className="input-group">
-              <label>Email *</label>
-              <div className="input-with-icon">
-                <span className="input-icon">✉️</span>
-                <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="hello@example.com" 
-                  required 
-                />
-              </div>
+          
+          <div className="signup-features">
+            <div className="feature-item">
+              <span className="feature-icon">🔍</span>
+              <p>Find trusted professionals instantly for any home service need.</p>
             </div>
-
-            <div className="input-group">
-              <label>Password *</label>
-              <div className="input-with-icon">
-                <span className="input-icon">🔒</span>
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password" 
-                  required 
-                  minLength="6"
-                />
-              </div>
+            <div className="feature-item">
+              <span className="feature-icon">📅</span>
+              <p>Manage your bookings and view service history seamlessly.</p>
             </div>
-
-            <button type="submit" className="auth-submit-btn">Sign up</button>
-          </form>
-
-          <p className="auth-footer-text">
-            Already have an account? <Link to="/login">Sign In</Link>
-          </p>
+            <div className="feature-item">
+              <span className="feature-icon">🛡️</span>
+              <p>Secure payments and verified professional reviews.</p>
+            </div>
+          </div>
+          
+          <div className="signup-help">
+            Need help? <Link to="#">Our FAQ can help</Link>
+          </div>
+        </div>
+        
+        <div className="signup-left-bottom">
+          <h3>These businesses trust our network.</h3>
+          <div className="trust-logos">
+            <div className="trust-logo">Partner 1</div>
+            <div className="trust-logo">Partner 2</div>
+            <div className="trust-logo">Partner 3</div>
+            <div className="trust-logo">Partner 4</div>
+          </div>
         </div>
       </div>
-      
-      <div className="auth-right" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1000&auto=format&fit=crop')" }}>
-        <div className="testimonial-box">
-          <div className="quote-icon">“</div>
-          <p className="testimonial-text">
-            Joining this platform was the best decision! It's incredibly intuitive and gives me access to top-tier professionals instantly.
-          </p>
-          <div className="testimonial-author">
-            <div className="author-avatar">J</div>
-            <div className="author-info">
-              <h4>Jane Mitchell</h4>
-              <span>Customer</span>
-            </div>
+
+      {/* Right Overlapping Form Card */}
+      <div className="signup-right-container">
+        <div className="signup-card">
+          <div className="signup-card-header">
+            <h1>Sign up for a KL09 ID</h1>
+            <p>Already have a KL09 account? <Link to="/login">Sign in</Link></p>
           </div>
+
+          {error && <div className="signup-error">{error}</div>}
+
+          <form onSubmit={handleSignUp} className="signup-form">
+            <div className="form-group full-width">
+              <label>Email *</label>
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group half-width">
+                <label>First Name *</label>
+                <input 
+                  type="text" 
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required 
+                />
+              </div>
+              <div className="form-group half-width">
+                <label>Last Name *</label>
+                <input 
+                  type="text" 
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required 
+                />
+              </div>
+            </div>
+
+            <div className="form-group full-width">
+              <label>Phone Number *</label>
+              <input 
+                type="tel" 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required 
+              />
+            </div>
+
+            <div className="form-group full-width">
+              <label>I am registering as a... *</label>
+              <select value={role} onChange={(e) => setRole(e.target.value)} required>
+                <option value="user">User / Homeowner</option>
+                <option value="admin">Service Professional</option>
+              </select>
+            </div>
+
+            <div className="form-group full-width">
+              <label>Create Password *</label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+                minLength="6"
+              />
+            </div>
+
+            <div className="terms-group">
+              <input 
+                type="checkbox" 
+                id="terms" 
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+              />
+              <label htmlFor="terms">
+                I have read and agree to the <Link to="#">Terms of Use</Link> and understand that my personal information is processed in accordance with the <Link to="#">Privacy Statement</Link>.
+              </label>
+            </div>
+
+            <div className="submit-container">
+              <button type="submit" className="signup-submit-btn">Continue</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
