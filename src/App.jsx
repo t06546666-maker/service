@@ -10,6 +10,7 @@ import WorkersList from './pages/Workers/WorkersList';
 import ProfessionalDashboard from './pages/Admin/ProfessionalDashboard';
 import Login from './pages/Auth/Login';
 import SignUp from './pages/Auth/SignUp';
+import AIAssistant from './components/AIAssistant/AIAssistant';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
         </Routes>
+        <AIAssistant />
       </div>
     </Router>
   );
