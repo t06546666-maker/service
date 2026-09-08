@@ -36,23 +36,32 @@ export default function SystemAdminDashboard() {
   const [addingProf, setAddingProf] = useState(false);
   const [profStatus, setProfStatus] = useState('');
 
+  const ADMIN_EMAILS = ['admin@gmail.com'];
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
+        // Try Firestore first
+        let isAdmin = false;
         try {
-          // Verify admin role
           const userDocRef = doc(db, 'users', currentUser.uid);
           const userDocSnap = await getDoc(userDocRef);
-          
           if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-            setUser(currentUser);
-            await fetchDashboardData();
-          } else {
-            // Not an admin, boot them to home
-            navigate('/');
+            isAdmin = true;
           }
         } catch (err) {
-          console.error("Error verifying admin role:", err);
+          console.warn("Firestore check failed, using email fallback:", err.message);
+        }
+
+        // Email-based fallback
+        if (!isAdmin && ADMIN_EMAILS.includes(currentUser.email)) {
+          isAdmin = true;
+        }
+
+        if (isAdmin) {
+          setUser(currentUser);
+          try { await fetchDashboardData(); } catch (e) { console.warn("Could not load dashboard data:", e.message); }
+        } else {
           navigate('/');
         }
       } else {
