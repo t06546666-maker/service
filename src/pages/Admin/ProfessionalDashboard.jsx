@@ -23,6 +23,7 @@ export default function ProfessionalDashboard() {
     portfolioImages: [] // Array of image URLs
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -34,9 +35,11 @@ export default function ProfessionalDashboard() {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             setFormData(docSnap.data());
+            setIsNewUser(false);
           } else {
             // Pre-fill with user auth data if no worker profile exists yet
             setFormData(prev => ({ ...prev, name: currentUser.displayName || '' }));
+            setIsNewUser(true);
           }
         } catch (err) {
           console.error("Error fetching profile", err);
@@ -68,11 +71,19 @@ export default function ProfessionalDashboard() {
       const snapshot = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
       
+      const newImages = [...(formData.portfolioImages || []), downloadURL];
+      
       setFormData(prev => ({
         ...prev,
-        portfolioImages: [...(prev.portfolioImages || []), downloadURL]
+        portfolioImages: newImages
       }));
-      setStatus('Image uploaded successfully!');
+
+      // Save directly to Firestore
+      await setDoc(doc(db, "workers", user.uid), {
+        portfolioImages: newImages
+      }, { merge: true });
+
+      setStatus('Image uploaded and saved successfully!');
       setTimeout(() => setStatus(''), 3000);
     } catch (error) {
       console.error("Error uploading image: ", error);
@@ -83,11 +94,21 @@ export default function ProfessionalDashboard() {
     }
   };
 
-  const handleRemoveImage = (indexToRemove) => {
+  const handleRemoveImage = async (indexToRemove) => {
+    const newImages = formData.portfolioImages.filter((_, index) => index !== indexToRemove);
     setFormData(prev => ({
       ...prev,
-      portfolioImages: prev.portfolioImages.filter((_, index) => index !== indexToRemove)
+      portfolioImages: newImages
     }));
+
+    try {
+      await setDoc(doc(db, "workers", user.uid), {
+        portfolioImages: newImages
+      }, { merge: true });
+    } catch (error) {
+      console.error("Error removing image: ", error);
+      setStatus('Error removing image. Please try again.');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -103,6 +124,7 @@ export default function ProfessionalDashboard() {
         reviews: formData.reviews || 0,
         updatedAt: new Date().toISOString()
       });
+      setIsNewUser(false);
       setStatus('Profile saved successfully!');
       setTimeout(() => setStatus(''), 3000);
     } catch (error) {
@@ -143,8 +165,10 @@ export default function ProfessionalDashboard() {
       <div className="prof-main-content">
         <div className="prof-card">
           <div className="prof-card-header">
-            <h1>Edit Your Profile</h1>
-            <p>This information will be displayed publicly to users looking for your services.</p>
+            <h1>{isNewUser ? "Welcome! Let's Complete Your Profile" : "Edit Your Profile"}</h1>
+            <p>{isNewUser 
+              ? "Please provide your work details and upload pictures of your recent work to get started." 
+              : "This information will be displayed publicly to users looking for your services."}</p>
           </div>
 
           {status && (
@@ -245,7 +269,7 @@ export default function ProfessionalDashboard() {
 
             <div className="prof-submit-container">
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? 'Saving...' : 'Save Public Profile'}
+                {saving ? 'Saving...' : (isNewUser ? 'Create Public Profile' : 'Save Public Profile')}
               </button>
             </div>
           </form>
