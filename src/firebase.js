@@ -5,6 +5,7 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getVertexAI } from "firebase/vertexai";
+import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -39,5 +40,6 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const vertexAI = getVertexAI(app);
+const storage = getStorage(app);
 
-export { app, analytics, db, auth, googleProvider, appCheck, vertexAI };
+export { app, analytics, db, auth, googleProvider, appCheck, vertexAI, storage };

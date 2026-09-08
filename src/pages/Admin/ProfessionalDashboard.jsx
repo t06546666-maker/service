@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, db, storage } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import './ProfessionalDashboard.css';
 
@@ -21,7 +22,7 @@ export default function ProfessionalDashboard() {
     hourlyRate: '',
     portfolioImages: [] // Array of image URLs
   });
-  const [newImageUrl, setNewImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -56,13 +57,29 @@ export default function ProfessionalDashboard() {
     }));
   };
 
-  const handleAddImage = () => {
-    if (newImageUrl.trim() !== '') {
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setStatus('Uploading image...');
+    try {
+      const storageRef = ref(storage, `portfolio/${user.uid}/${Date.now()}_${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
       setFormData(prev => ({
         ...prev,
-        portfolioImages: [...(prev.portfolioImages || []), newImageUrl.trim()]
+        portfolioImages: [...(prev.portfolioImages || []), downloadURL]
       }));
-      setNewImageUrl('');
+      setStatus('Image uploaded successfully!');
+      setTimeout(() => setStatus(''), 3000);
+    } catch (error) {
+      console.error("Error uploading image: ", error);
+      setStatus('Error uploading image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+      e.target.value = null; // Reset file input
     }
   };
 
@@ -202,16 +219,16 @@ export default function ProfessionalDashboard() {
 
             <div className="portfolio-section">
               <h3>Portfolio & Past Work</h3>
-              <p>Add image URLs of your past projects to show off your skills.</p>
+              <p>Upload images of your past projects to show off your skills.</p>
               
               <div className="portfolio-input-row">
                 <input 
-                  type="url" 
-                  value={newImageUrl} 
-                  onChange={(e) => setNewImageUrl(e.target.value)} 
-                  placeholder="https://example.com/my-project-image.jpg" 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleImageUpload} 
+                  disabled={uploadingImage || !user}
                 />
-                <button type="button" onClick={handleAddImage} className="btn-secondary">Add Image</button>
+                {uploadingImage && <span style={{marginLeft: '10px'}}>Uploading...</span>}
               </div>
 
               {formData.portfolioImages && formData.portfolioImages.length > 0 && (
