@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../../firebase';
 import './Auth.css'; // Shared CSS for both Login and SignUp
 
@@ -33,6 +33,13 @@ export default function Login() {
             navigate('/');
           }
         } else {
+          // Document doesn't exist (maybe created in Firebase Console), create default user
+          await setDoc(userDocRef, {
+            name: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            role: 'user',
+            createdAt: new Date().toISOString()
+          });
           navigate('/');
         }
       } catch (dbErr) {
@@ -70,6 +77,14 @@ export default function Login() {
             navigate('/');
           }
         } else {
+          // Document doesn't exist (first time Google login), create default user
+          await setDoc(userDocRef, {
+            name: user.displayName || 'Google User',
+            email: user.email,
+            role: 'user',
+            phoneNumber: user.phoneNumber || '',
+            createdAt: new Date().toISOString()
+          });
           navigate('/');
         }
       } catch (dbErr) {

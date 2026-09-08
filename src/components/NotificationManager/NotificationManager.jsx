@@ -16,8 +16,8 @@ export default function NotificationManager() {
           console.log('Notification permission granted.');
           // NOTE: You must replace 'YOUR_VAPID_KEY_HERE' with your actual VAPID key 
           // from Firebase Console -> Project Settings -> Cloud Messaging -> Web Configuration
-          const currentToken = await getToken(messaging, { 
-            vapidKey: 'YOUR_VAPID_KEY_HERE' 
+          const currentToken = await getToken(messaging, {
+            vapidKey: 'BBelyRiCvjgt49ASAUpNZv-vsTNZ73Ql3rMSYsPOxHGeKJt5NkDvG8szz7EWOoVnMKg5nChe7w7Qun7uQu6ObzE'
           });
 
           if (currentToken) {
