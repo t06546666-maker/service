@@ -29,6 +29,7 @@ export default function ProfessionalDashboard() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        setLoading(false); // Dismiss loading screen immediately
         // Fetch existing worker profile if they have one
         try {
           const docRef = doc(db, 'workers', currentUser.uid);
@@ -46,8 +47,8 @@ export default function ProfessionalDashboard() {
         }
       } else {
         navigate('/login');
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [navigate]);

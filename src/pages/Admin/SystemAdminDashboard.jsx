@@ -60,14 +60,17 @@ export default function SystemAdminDashboard() {
 
         if (isAdmin) {
           setUser(currentUser);
-          try { await fetchDashboardData(); } catch (e) { console.warn("Could not load dashboard data:", e.message); }
+          setLoading(false); // Dismiss loading screen immediately
+          
+          // Fetch data in background without blocking
+          fetchDashboardData().catch(e => console.warn("Could not load dashboard data:", e.message));
         } else {
           navigate('/');
         }
       } else {
         navigate('/admin');
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [navigate]);
