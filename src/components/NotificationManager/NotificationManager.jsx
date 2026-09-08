@@ -38,9 +38,33 @@ export default function NotificationManager() {
       }
     };
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const triggerWelcomeBack = async (user) => {
+      // Check session storage so we only welcome them once per browser session
+      if (!sessionStorage.getItem('welcomed_back')) {
+        sessionStorage.setItem('welcomed_back', 'true');
+        
+        try {
+          const { collection, addDoc } = await import('firebase/firestore');
+          // Add a document to the notifications collection to trigger the Cloud Function
+          await addDoc(collection(db, 'notifications'), {
+            userId: user.uid,
+            title: 'Welcome Back! 👋',
+            body: `Great to see you again, ${user.displayName || 'User'}!`,
+            createdAt: new Date().toISOString()
+          });
+          console.log("Triggered welcome back notification.");
+        } catch (error) {
+          console.error("Could not trigger welcome back:", error);
+        }
+      }
+    };
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        requestNotificationPermission(user);
+        await requestNotificationPermission(user);
+        
+        // Wait 3 seconds to ensure token is saved, then trigger the welcome notification
+        setTimeout(() => triggerWelcomeBack(user), 3000);
       }
     });
 
