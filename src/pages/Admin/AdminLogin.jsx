@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebase';
+import React, { useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
+
+// List of authorised admin emails - add more here as needed
+const ADMIN_EMAILS = ['admin@gmail.com'];
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -12,68 +14,30 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // If already logged in as admin, auto-redirect
-  useEffect(() => {
-    const ADMIN_EMAILS = ['admin@gmail.com'];
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        // Try Firestore first, fall back to email check
-        try {
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-          if (userDoc.exists() && userDoc.data().role === 'admin') {
-            navigate('/admin-dashboard');
-            return;
-          }
-        } catch (err) {
-          console.warn("Firestore check skipped, using email fallback:", err.message);
-        }
-        // Email-based fallback
-        if (ADMIN_EMAILS.includes(currentUser.email)) {
-          navigate('/admin-dashboard');
-        }
-        // If not admin, just show the login form — do NOT redirect to homepage
-      }
-    });
-    return () => unsubscribe();
-  }, [navigate]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      // Step 1: Sign in with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Try to verify role via Firestore first
-      try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-          navigate('/admin-dashboard');
-          return;
-        }
-      } catch (dbErr) {
-        console.warn("Firestore check failed, using email fallback:", dbErr.message);
-      }
-
-      // Fallback: allow known admin emails directly
-      // This works even when Firestore/App Check is blocking DB reads
-      const ADMIN_EMAILS = ['admin@gmail.com'];
+      // Step 2: Check if email is in the admin list (no Firestore needed)
       if (ADMIN_EMAILS.includes(user.email)) {
         navigate('/admin-dashboard');
-        return;
+      } else {
+        setError('Access Denied. You do not have administrator privileges.');
+        await auth.signOut();
       }
-
-      // Not an admin by any check
-      setError('Access Denied. You do not have administrator privileges.');
-      await auth.signOut();
-
     } catch (err) {
       console.error("Admin Login error:", err);
-      setError('Login failed: ' + err.message);
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError('Invalid email or password.');
+      } else {
+        setError('Login failed: ' + err.message);
+      }
     } finally {
       setLoading(false);
     }
