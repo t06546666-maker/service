@@ -9,22 +9,24 @@ export default function Navbar() {
   const [userProfile, setUserProfile] = useState(null);
   const navigate = useNavigate();
 
+  const ADMIN_EMAILS = ['admin@gmail.com'];
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Fetch user document from Firestore to get their name
+        // Try Firestore first for role
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
             setUserProfile(userDoc.data());
-          } else {
-            // Fallback if no document exists but they are logged in
-            setUserProfile({ name: user.displayName || user.email });
+            return;
           }
         } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setUserProfile({ name: user.email });
+          console.warn("Firestore unavailable, using email fallback:", error.message);
         }
+        // Fallback: determine role from email
+        const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user';
+        setUserProfile({ name: user.displayName || user.email, email: user.email, role });
       } else {
         setUserProfile(null);
       }
