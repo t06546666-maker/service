@@ -14,19 +14,24 @@ export default function AdminLogin() {
 
   // If already logged in as admin, auto-redirect
   useEffect(() => {
+    const ADMIN_EMAILS = ['admin@gmail.com'];
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
+        // Try Firestore first, fall back to email check
         try {
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
           if (userDoc.exists() && userDoc.data().role === 'admin') {
             navigate('/admin-dashboard');
-          } else {
-            // Logged in as someone else, kick them out of admin page
-            navigate('/');
+            return;
           }
         } catch (err) {
-          console.error(err);
+          console.warn("Firestore check skipped, using email fallback:", err.message);
         }
+        // Email-based fallback
+        if (ADMIN_EMAILS.includes(currentUser.email)) {
+          navigate('/admin-dashboard');
+        }
+        // If not admin, just show the login form — do NOT redirect to homepage
       }
     });
     return () => unsubscribe();
