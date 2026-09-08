@@ -13,6 +13,7 @@ import AdminLogin from './pages/Admin/AdminLogin';
 import Login from './pages/Auth/Login';
 import SignUp from './pages/Auth/SignUp';
 import AIAssistant from './components/AIAssistant/AIAssistant';
+import NotificationManager from './components/NotificationManager/NotificationManager';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
         </Routes>
         <AIAssistant />
+        <NotificationManager />
       </div>
     </Router>
   );

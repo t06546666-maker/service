@@ -6,6 +6,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 // import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAI } from "firebase/ai";
 import { getStorage } from "firebase/storage";
+import { getMessaging } from "firebase/messaging";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -41,5 +42,6 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const vertexAI = getAI(app);
 const storage = getStorage(app);
+const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
 
-export { app, analytics, db, auth, googleProvider, vertexAI, storage };
+export { app, analytics, db, auth, googleProvider, vertexAI, storage, messaging };
