@@ -71,9 +71,14 @@ export default function NotificationManager() {
     // Listen for foreground messages
     const unsubscribeMessage = onMessage(messaging, (payload) => {
       console.log('Message received in foreground. ', payload);
-      // You can customize how foreground notifications look here
-      // E.g., showing a custom toast or alert
-      alert(`${payload.notification.title}: ${payload.notification.body}`);
+      
+      // Even if the tab is open, force a native system notification instead of an alert box
+      if (Notification.permission === 'granted') {
+        new Notification(payload.notification.title, {
+          body: payload.notification.body,
+          icon: '/logo.png' // Optional: add your logo here
+        });
+      }
     });
 
     return () => {
