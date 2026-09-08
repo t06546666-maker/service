@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getGenerativeModel } from 'firebase/vertexai';
+import { getGenerativeModel } from 'firebase/ai';
 import { vertexAI } from '../../firebase';
 import './AIAssistant.css';
 
