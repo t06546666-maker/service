@@ -56,7 +56,8 @@ export default function SignUp() {
       } else if (err.code === 'auth/invalid-email') {
         setError('Please enter a valid email address.');
       } else {
-        setError('Error creating account. Please try again.');
+        console.error("Signup error:", err);
+        setError('Error creating account: ' + err.message);
       }
     }
   };

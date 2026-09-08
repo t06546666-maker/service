@@ -36,8 +36,8 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      console.error(err);
-      setError('Invalid email or password.');
+      console.error("Login error:", err);
+      setError('Login failed: ' + err.message);
     }
   };
 
@@ -65,8 +65,8 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      console.error(err);
-      setError('Google Sign-In failed. Please try again.');
+      console.error("Google Login error:", err);
+      setError('Google Sign-In failed: ' + err.message);
     }
   };
 
