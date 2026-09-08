@@ -27,10 +27,15 @@ exports.sendPushNotification = functions.firestore
     }
 
     const userData = userDoc.data();
-    const fcmToken = userData.fcmToken;
+    const fcmTokens = userData.fcmTokens || [];
+    
+    // For backwards compatibility, if they have the old string format, add it to array
+    if (userData.fcmToken && !fcmTokens.includes(userData.fcmToken)) {
+      fcmTokens.push(userData.fcmToken);
+    }
 
-    if (!fcmToken) {
-      console.log(`User ${targetUserId} does not have an FCM token saved.`);
+    if (fcmTokens.length === 0) {
+      console.log(`User ${targetUserId} does not have any FCM tokens saved.`);
       return null;
     }
 
@@ -40,7 +45,7 @@ exports.sendPushNotification = functions.firestore
         title: title,
         body: body,
       },
-      token: fcmToken,
+      tokens: fcmTokens,
       webpush: {
         notification: {
           icon: "/logo.png", // Web notification icon
@@ -49,9 +54,9 @@ exports.sendPushNotification = functions.firestore
       }
     };
 
-    // 3. Send the message
-    const response = await admin.messaging().send(message);
-    console.log("Successfully sent message:", response);
+    // 3. Send the message to all devices
+    const response = await admin.messaging().sendEachForMulticast(message);
+    console.log("Successfully sent messages:", response.successCount, "success,", response.failureCount, "failures");
 
     // Optional: Mark notification as sent in Firestore
     await snap.ref.update({ status: 'sent', sentAt: admin.firestore.FieldValue.serverTimestamp() });

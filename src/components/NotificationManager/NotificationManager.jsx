@@ -22,9 +22,10 @@ export default function NotificationManager() {
 
           if (currentToken) {
             console.log('FCM Token:', currentToken);
-            // Save the token to the user's document in Firestore
+            // Save the token to the user's document in Firestore as an array
+            const { arrayUnion } = await import('firebase/firestore');
             await setDoc(doc(db, 'users', user.uid), {
-              fcmToken: currentToken
+              fcmTokens: arrayUnion(currentToken)
             }, { merge: true });
           } else {
             console.log('No registration token available. Request permission to generate one.');
