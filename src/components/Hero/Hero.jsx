@@ -1,8 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import './Hero.css';
 
 export default function Hero() {
   const [searchValue, setSearchValue] = useState('');
+  const [bgUrl, setBgUrl] = useState('');
+
+  useEffect(() => {
+    const fetchHeroBg = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'homepage');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().heroBackgroundUrl) {
+          setBgUrl(docSnap.data().heroBackgroundUrl);
+        }
+      } catch (err) {
+        console.error("Failed to fetch hero background", err);
+      }
+    };
+    fetchHeroBg();
+  }, []);
 
   const handleSearch = () => {
     if (searchValue.trim()) {
@@ -19,7 +37,14 @@ export default function Hero() {
 
   return (
     <section className="homa-hero">
-        <div className="homa-hero-inner">
+        <div 
+          className="homa-hero-inner"
+          style={bgUrl ? { 
+            backgroundImage: `url(${bgUrl})`, 
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center' 
+          } : {}}
+        >
           <div className="homa-hero-content">
             <h1 className="homa-hero-title">Connect with Reliable<br/>Professionals Home Service</h1>
             <div className="homa-search-box">

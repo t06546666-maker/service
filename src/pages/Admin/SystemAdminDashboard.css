@@ -7,12 +7,12 @@
 /* Sidebar */
 .sysadmin-sidebar {
   flex: 1;
-  background-color: #0f172a; /* Different darker theme for system admin */
+  background-color: #0f172a; 
   color: white;
   padding: 3rem 2rem 3rem 10%;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2rem;
   max-width: 400px;
 }
 
@@ -25,6 +25,36 @@
   color: #94a3b8;
   line-height: 1.5;
   font-size: 1.1rem;
+}
+
+.sysadmin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sysadmin-nav-btn {
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  text-align: left;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sysadmin-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.sysadmin-nav-btn.active {
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: 600;
 }
 
 .sysadmin-sidebar-stats {
@@ -81,6 +111,147 @@
   color: #64748b;
 }
 
+/* Forms & Inputs */
+.sysadmin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.form-row .input-group {
+  flex: 1;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+  padding: 0.8rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+
+.sysadmin-submit-btn {
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 1rem;
+}
+
+.sysadmin-submit-btn:hover {
+  background: #1e293b;
+}
+
+.sysadmin-submit-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* File Upload */
+.settings-section {
+  background: #f8fafc;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+}
+
+.settings-section h3 {
+  font-size: 1.2rem;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.settings-desc {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.file-upload-box {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+}
+
+.file-label {
+  display: block;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #475569;
+  text-align: center;
+  cursor: pointer;
+}
+
+.file-upload-box:hover .file-label {
+  border-color: #94a3b8;
+}
+
+/* Status Messages */
+.sysadmin-status {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.sysadmin-status.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.sysadmin-status.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Table */
 .users-table-container {
   overflow-x: auto;
 }
@@ -146,4 +317,13 @@
   height: calc(100vh - 80px);
   font-size: 1.2rem;
   color: #64748b;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
