@@ -56,7 +56,7 @@ export default function SystemAdminDashboard() {
           navigate('/');
         }
       } else {
-        navigate('/login');
+        navigate('/admin');
       }
       setLoading(false);
     });

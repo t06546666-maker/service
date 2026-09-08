@@ -58,7 +58,7 @@ export default function Navbar() {
               <Link to="/professional">Professional Dashboard</Link>
             )}
             {userProfile?.role === 'admin' && (
-              <Link to="/admin">System Admin</Link>
+              <Link to="/admin-dashboard">System Admin</Link>
             )}
             <Link to="#" onClick={(e) => { e.preventDefault(); alert('FAQ clicked'); }}>FAQ</Link>
           </div>
