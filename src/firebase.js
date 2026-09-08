@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+// import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAI } from "firebase/ai";
 import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -30,10 +30,10 @@ if (window.location.hostname === "localhost") {
   self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 
-const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('6LdLRK4tAAAAALnGcPs8JL6SygArxoHjKrriOIOZ'),
-  isTokenAutoRefreshEnabled: true
-});
+// const appCheck = initializeAppCheck(app, {
+//   provider: new ReCaptchaV3Provider('6LdLRK4tAAAAALnGcPs8JL6SygArxoHjKrriOIOZ'),
+//   isTokenAutoRefreshEnabled: true
+// });
 
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
@@ -42,4 +42,4 @@ const googleProvider = new GoogleAuthProvider();
 const vertexAI = getAI(app);
 const storage = getStorage(app);
 
-export { app, analytics, db, auth, googleProvider, appCheck, vertexAI, storage };
+export { app, analytics, db, auth, googleProvider, vertexAI, storage };

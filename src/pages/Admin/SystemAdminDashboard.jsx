@@ -39,15 +39,20 @@ export default function SystemAdminDashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Verify admin role
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        
-        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-          setUser(currentUser);
-          await fetchDashboardData();
-        } else {
-          // Not an admin, boot them to home
+        try {
+          // Verify admin role
+          const userDocRef = doc(db, 'users', currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          
+          if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+            setUser(currentUser);
+            await fetchDashboardData();
+          } else {
+            // Not an admin, boot them to home
+            navigate('/');
+          }
+        } catch (err) {
+          console.error("Error verifying admin role:", err);
           navigate('/');
         }
       } else {
