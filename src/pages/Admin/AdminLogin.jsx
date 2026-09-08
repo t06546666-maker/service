@@ -42,15 +42,20 @@ export default function AdminLogin() {
       const user = userCredential.user;
 
       // Verify they are actually an admin
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
 
-      if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-        navigate('/admin-dashboard');
-      } else {
-        // Not an admin
-        setError('Access Denied. You do not have administrator privileges.');
-        await auth.signOut(); // Force sign out since they shouldn't be here
+        if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+          navigate('/admin-dashboard');
+        } else {
+          setError('Access Denied. You do not have administrator privileges.');
+          await auth.signOut();
+        }
+      } catch (dbErr) {
+        console.warn("Could not verify admin role from Firestore:", dbErr);
+        setError('Could not verify admin role. Check Firestore permissions: ' + dbErr.message);
+        await auth.signOut();
       }
     } catch (err) {
       console.error("Admin Login error:", err);

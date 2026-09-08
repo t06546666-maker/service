@@ -18,26 +18,34 @@ export default function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Fetch user profile from Firestore to determine role
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      // Try to fetch role from Firestore; if it fails, just go home
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
 
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        if (userData.role === 'admin') {
-          navigate('/admin');
-        } else if (userData.role === 'professional') {
-          navigate('/professional');
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          if (userData.role === 'admin') {
+            navigate('/admin-dashboard');
+          } else if (userData.role === 'professional') {
+            navigate('/professional');
+          } else {
+            navigate('/');
+          }
         } else {
           navigate('/');
         }
-      } else {
-        // Fallback if no document exists
+      } catch (dbErr) {
+        console.warn("Could not fetch role from Firestore, redirecting home:", dbErr);
         navigate('/');
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError('Login failed: ' + err.message);
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError('Login failed: ' + err.message);
+      }
     }
   };
 
@@ -47,21 +55,25 @@ export default function Login() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // Fetch user profile from Firestore to determine role
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      // Try to fetch role from Firestore; if it fails, just go home
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
 
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        if (userData.role === 'admin') {
-          navigate('/admin');
-        } else if (userData.role === 'professional') {
-          navigate('/professional');
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          if (userData.role === 'admin') {
+            navigate('/admin-dashboard');
+          } else if (userData.role === 'professional') {
+            navigate('/professional');
+          } else {
+            navigate('/');
+          }
         } else {
           navigate('/');
         }
-      } else {
-        // Fallback if no document exists
+      } catch (dbErr) {
+        console.warn("Could not fetch role from Firestore, redirecting home:", dbErr);
         navigate('/');
       }
     } catch (err) {
