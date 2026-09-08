@@ -26,6 +26,8 @@ export default function Login() {
         const userData = userDocSnap.data();
         if (userData.role === 'admin') {
           navigate('/admin');
+        } else if (userData.role === 'professional') {
+          navigate('/professional');
         } else {
           navigate('/');
         }
@@ -53,6 +55,8 @@ export default function Login() {
         const userData = userDocSnap.data();
         if (userData.role === 'admin') {
           navigate('/admin');
+        } else if (userData.role === 'professional') {
+          navigate('/professional');
         } else {
           navigate('/');
         }

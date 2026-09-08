@@ -43,6 +43,8 @@ export default function SignUp() {
       // Redirect based on role or just to home
       if (role === 'admin') {
         navigate('/admin');
+      } else if (role === 'professional') {
+        navigate('/professional');
       } else {
         navigate('/');
       }
@@ -85,6 +87,8 @@ export default function SignUp() {
       
       if (finalRole === 'admin') {
         navigate('/admin');
+      } else if (finalRole === 'professional') {
+        navigate('/professional');
       } else {
         navigate('/');
       }
@@ -117,11 +121,20 @@ export default function SignUp() {
             <label className="radio-label">
               <input 
                 type="radio" 
+                checked={role === 'professional'} 
+                onChange={() => setRole('professional')} 
+              />
+              <span className="radio-custom"></span>
+              As a Professional
+            </label>
+            <label className="radio-label">
+              <input 
+                type="radio" 
                 checked={role === 'admin'} 
                 onChange={() => setRole('admin')} 
               />
               <span className="radio-custom"></span>
-              As a Professional
+              As System Admin (Test)
             </label>
           </div>
 

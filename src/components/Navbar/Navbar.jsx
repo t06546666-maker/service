@@ -54,7 +54,12 @@ export default function Navbar() {
           <div className="homa-nav-links">
             <Link to="/">Home</Link>
             <Link to="/workers">Our Professionals</Link>
-            <Link to="/admin">Admin</Link>
+            {userProfile?.role === 'professional' && (
+              <Link to="/professional">Professional Dashboard</Link>
+            )}
+            {userProfile?.role === 'admin' && (
+              <Link to="/admin">System Admin</Link>
+            )}
             <Link to="#" onClick={(e) => { e.preventDefault(); alert('FAQ clicked'); }}>FAQ</Link>
           </div>
           <div className="homa-nav-auth">

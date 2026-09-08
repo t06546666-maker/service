@@ -8,6 +8,7 @@ import FeaturedServices from './components/FeaturedServices/FeaturedServices';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import WorkersList from './pages/Workers/WorkersList';
 import ProfessionalDashboard from './pages/Admin/ProfessionalDashboard';
+import SystemAdminDashboard from './pages/Admin/SystemAdminDashboard';
 import Login from './pages/Auth/Login';
 import SignUp from './pages/Auth/SignUp';
 import AIAssistant from './components/AIAssistant/AIAssistant';
@@ -27,7 +28,8 @@ function App() {
             </>
           } />
           <Route path="/workers" element={<WorkersList />} />
-          <Route path="/admin" element={<ProfessionalDashboard />} />
+          <Route path="/professional" element={<ProfessionalDashboard />} />
+          <Route path="/admin" element={<SystemAdminDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
         </Routes>
