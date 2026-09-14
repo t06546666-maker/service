@@ -137,7 +137,9 @@ exports.askAIAssistant = functions.runWith({ secrets: [geminiApiKey] }).https.on
     return { response: text };
   } catch (error) {
     console.error("AI Generation Error:", error);
-    throw new functions.https.HttpsError('internal', 'AI is currently unavailable. Check your Secret Manager API key.');
+    // Throwing 'internal' causes Firebase to hide the message for security. 
+    // Throwing 'unknown' allows us to see the real error on the frontend.
+    throw new functions.https.HttpsError('unknown', error.message || 'Unknown backend error');
   }
 });
 
