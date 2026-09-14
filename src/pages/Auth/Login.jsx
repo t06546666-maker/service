@@ -16,6 +16,7 @@ export default function Login() {
   const [otpCode, setOtpCode] = useState('');
   const [verificationId, setVerificationId] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const navigate = useNavigate();
 
@@ -86,7 +87,9 @@ export default function Login() {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
+    if (isProcessing) return;
     setError('');
+    setIsProcessing(true);
     try {
       setupRecaptcha();
       const appVerifier = window.recaptchaVerifier;
@@ -97,23 +100,29 @@ export default function Login() {
       setOtpSent(true);
     } catch (err) {
       console.error("Error sending OTP", err);
-      setError("Failed to send OTP. Please check the number format.");
+      setError(`Failed to send OTP: ${err.message}`);
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.clear();
         window.recaptchaVerifier = null;
       }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
+    if (isProcessing) return;
     setError('');
+    setIsProcessing(true);
     try {
       const result = await verificationId.confirm(otpCode);
       await handleRoleRedirect(result.user, 'Phone User');
     } catch (err) {
       console.error("Error verifying OTP", err);
       setError("Invalid OTP code. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -170,7 +179,9 @@ export default function Login() {
                   </div>
                 </div>
                 <div id="recaptcha-container"></div>
-                <button type="submit" className="auth-submit-btn">Send OTP</button>
+                <button type="submit" className="auth-submit-btn" disabled={isProcessing}>
+                  {isProcessing ? 'Sending...' : 'Send OTP'}
+                </button>
                 <p className="auth-footer-text">
                   <a href="#" onClick={(e) => { e.preventDefault(); setUseOtp(false); }}>Back to Email Login</a>
                 </p>
@@ -190,7 +201,9 @@ export default function Login() {
                     />
                   </div>
                 </div>
-                <button type="submit" className="auth-submit-btn">Verify & Login</button>
+                <button type="submit" className="auth-submit-btn" disabled={isProcessing}>
+                  {isProcessing ? 'Verifying...' : 'Verify & Login'}
+                </button>
                 <p className="auth-footer-text">
                   <a href="#" onClick={(e) => { e.preventDefault(); setOtpSent(false); }}>Use a different number</a>
                 </p>
@@ -231,7 +244,9 @@ export default function Login() {
                 </div>
               </div>
 
-              <button type="submit" className="auth-submit-btn">Sign in</button>
+              <button type="submit" className="auth-submit-btn" disabled={isProcessing}>
+                {isProcessing ? 'Signing in...' : 'Sign in'}
+              </button>
             </form>
           )}
 
