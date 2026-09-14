@@ -68,3 +68,64 @@ exports.sendPushNotification = functions.firestore
     return null;
   }
 });
+
+// Example of a Callable HTTP Function that can be called from React
+exports.myCallableFunction = functions.https.onCall(async (data, context) => {
+  // 1. (Optional) Ensure the user is authenticated before allowing them to run this
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'The function must be called while authenticated.'
+    );
+  }
+
+  const userId = context.auth.uid;
+  
+  // 2. Access variables passed from your React app
+  const passedMessage = data.message;
+
+  try {
+    // 3. Do some backend work here (e.g., talk to a database, send an email, etc.)
+    console.log(`User ${userId} sent a message: ${passedMessage}`);
+
+    // 4. Return data back to your React app
+    return {
+      success: true,
+      response: `Hello User ${userId}! The server received your message: ${passedMessage}`
+    };
+  } catch (error) {
+    // Return a structured error back to the frontend
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Example of a Firebase Auth Trigger (Runs automatically when a user signs up)
+exports.onUserCreated = functions.auth.user().onCreate(async (user) => {
+  const uid = user.uid;
+  const email = user.email || 'No email provided';
+  const phone = user.phoneNumber || 'No phone provided';
+  const displayName = user.displayName || 'New User';
+
+  console.log(`New user signed up! UID: ${uid}, Email: ${email}, Phone: ${phone}`);
+
+  // You can execute automated background tasks here, such as:
+  // 1. Sending a welcome email via an external provider (like SendGrid)
+  // 2. Setting custom claims for role-based access
+  // 3. Pushing a "Welcome" notification to their feed
+  
+  // Example: Let's create a welcome notification for them automatically!
+  try {
+    await admin.firestore().collection('notifications').add({
+      userId: uid,
+      title: "Welcome to KL09 Home Service!",
+      body: "We are so glad you joined us. Start searching for professionals today!",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: 'pending'
+    });
+    console.log(`Welcome notification generated for ${uid}`);
+  } catch (err) {
+    console.error("Error creating welcome notification:", err);
+  }
+
+  return null;
+});
