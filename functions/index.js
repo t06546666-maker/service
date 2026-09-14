@@ -129,3 +129,39 @@ exports.onUserCreated = functions.auth.user().onCreate(async (user) => {
 
   return null;
 });
+
+// Trigger when a user is deleted from Firebase Authentication
+exports.onUserDeleted = functions.auth.user().onDelete(async (user) => {
+  const uid = user.uid;
+  
+  try {
+    // 1. Fetch the user's existing data from the 'users' collection
+    const userDocRef = admin.firestore().collection('users').doc(uid);
+    const userDoc = await userDocRef.get();
+    
+    let additionalData = {};
+    if (userDoc.exists) {
+      additionalData = userDoc.data();
+      
+      // Clean up: delete the user from the active 'users' collection
+      await userDocRef.delete();
+    }
+
+    // 2. Archive all their details in the 'deleted_users' collection
+    await admin.firestore().collection('deleted_users').doc(uid).set({
+      authUid: uid,
+      authEmail: user.email || 'No email',
+      authPhone: user.phoneNumber || 'No phone',
+      authDisplayName: user.displayName || 'No name',
+      deletedAt: admin.firestore.FieldValue.serverTimestamp(),
+      // Spread all their original database profile information here
+      originalProfileData: additionalData 
+    });
+
+    console.log(`Successfully archived and cleaned up deleted user: ${uid}`);
+  } catch (error) {
+    console.error(`Error archiving deleted user ${uid}:`, error);
+  }
+  
+  return null;
+});
