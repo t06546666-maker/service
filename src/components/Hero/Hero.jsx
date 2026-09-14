@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { db, app } from '../../firebase';
 import './Hero.css';
 
 export default function Hero() {
@@ -35,6 +36,20 @@ export default function Hero() {
     alert(`Searching for: ${tag}`);
   };
 
+  const testBackendFunction = async () => {
+    try {
+      alert("Calling backend... Check the console and wait for the alert!");
+      const functions = getFunctions(app);
+      const myCallableFunction = httpsCallable(functions, 'myCallableFunction');
+      
+      const result = await myCallableFunction({ message: "Hello from Hero Component!" });
+      alert(`Success! Backend says: \n\n${result.data.response}`);
+    } catch (error) {
+      console.error("Backend function failed:", error);
+      alert(`Error: ${error.message}\n\n(Did you deploy the function and are you logged in?)`);
+    }
+  };
+
   return (
     <section className="homa-hero">
         <div 
@@ -66,6 +81,22 @@ export default function Hero() {
                 </span>
               ))}
             </div>
+            <br />
+            <button 
+              onClick={testBackendFunction}
+              style={{
+                marginTop: '1rem',
+                padding: '10px 20px',
+                backgroundColor: '#0ea5e9',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+              }}
+            >
+              Test Backend Function
+            </button>
           </div>
           {/* Decorative floating cards would go here */}
         </div>
