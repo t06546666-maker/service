@@ -190,12 +190,14 @@ export default function SignUp() {
               <label>Phone Number *</label>
               <div className="input-with-icon">
                 <span className="input-icon">📱</span>
+                <span style={{ position: 'absolute', left: '2.5rem', color: '#1e293b', fontWeight: 500, fontSize: '0.95rem' }}>+91</span>
                 <input 
                   type="tel" 
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 (555) 123-4567" 
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="98765 43210" 
                   required 
+                  style={{ paddingLeft: '4.5rem' }}
                 />
               </div>
             </div>

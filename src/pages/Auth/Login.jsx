@@ -90,16 +90,8 @@ export default function Login() {
     try {
       setupRecaptcha();
       const appVerifier = window.recaptchaVerifier;
-      // Ensure Indian country code +91
-      let cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
-      if (cleanNumber.length === 10) {
-        cleanNumber = '91' + cleanNumber;
-      } else if (cleanNumber.startsWith('0')) {
-        cleanNumber = '91' + cleanNumber.substring(1);
-      } else if (!cleanNumber.startsWith('91')) {
-        cleanNumber = '91' + cleanNumber;
-      }
-      const formattedPhone = `+${cleanNumber}`;
+      // Fixed +91 Indian country code
+      const formattedPhone = `+91${phoneNumber}`;
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setVerificationId(confirmationResult);
       setOtpSent(true);
@@ -166,12 +158,14 @@ export default function Login() {
                   <label>Phone Number *</label>
                   <div className="input-with-icon">
                     <span className="input-icon">📱</span>
+                    <span style={{ position: 'absolute', left: '2.5rem', color: '#1e293b', fontWeight: 500, fontSize: '0.95rem' }}>+91</span>
                     <input 
                       type="tel" 
                       value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="+91 98765 43210" 
+                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      placeholder="98765 43210" 
                       required 
+                      style={{ paddingLeft: '4.5rem' }}
                     />
                   </div>
                 </div>
