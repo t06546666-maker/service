@@ -90,14 +90,22 @@ export default function Login() {
     try {
       setupRecaptcha();
       const appVerifier = window.recaptchaVerifier;
-      // Basic validation for E.164 format
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+      // Ensure Indian country code +91
+      let cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+      if (cleanNumber.length === 10) {
+        cleanNumber = '91' + cleanNumber;
+      } else if (cleanNumber.startsWith('0')) {
+        cleanNumber = '91' + cleanNumber.substring(1);
+      } else if (!cleanNumber.startsWith('91')) {
+        cleanNumber = '91' + cleanNumber;
+      }
+      const formattedPhone = `+${cleanNumber}`;
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setVerificationId(confirmationResult);
       setOtpSent(true);
     } catch (err) {
       console.error("Error sending OTP", err);
-      setError("Failed to send OTP. Please include country code (e.g. +1).");
+      setError("Failed to send OTP. Please check the number format.");
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.clear();
         window.recaptchaVerifier = null;
@@ -162,7 +170,7 @@ export default function Login() {
                       type="tel" 
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="+1 234 567 8900" 
+                      placeholder="+91 98765 43210" 
                       required 
                     />
                   </div>
