@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getGenerativeModel } from 'firebase/ai';
-import { vertexAI } from '../../firebase';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import './AIAssistant.css';
 
 export default function AIAssistant() {
@@ -27,8 +26,9 @@ export default function AIAssistant() {
     setIsLoading(true);
 
     try {
-      // Initialize the Gemini 1.5 Flash model
-      const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
+      // Initialize the Gemini model using Google AI Studio API Key
+      const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       
       // System instructions to guide the model's behavior
       const prompt = `You are a helpful assistant for a Home Services app. 
@@ -47,7 +47,7 @@ export default function AIAssistant() {
       setMessages(prev => [...prev, { role: 'assistant', text }]);
     } catch (error) {
       console.error("AI Error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', text: "Oops! I'm having trouble connecting to my brain right now. Please make sure Vertex AI is enabled in your Firebase Console." }]);
+      setMessages(prev => [...prev, { role: 'assistant', text: "Oops! Please make sure your Google AI Studio API Key is placed inside your .env file as REACT_APP_GEMINI_API_KEY and restart your server." }]);
     } finally {
       setIsLoading(false);
     }
