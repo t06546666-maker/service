@@ -189,11 +189,51 @@ exports.onImageUploaded = functions.storage.object().onFinalize(async (object) =
     return null;
   }
 
-  // --- ADD YOUR CUSTOM LOGIC HERE ---
-  // Popular things to do here:
-  // 1. Resize the image (e.g., using the 'sharp' library or ImageMagick)
-  // 2. Scan the image for inappropriate content using Google Cloud Vision API
-  // 3. Update a Firestore document to notify the frontend that processing is complete
+  const path = require('path');
+  const os = require('os');
+  const fs = require('fs');
+  const sharp = require('sharp');
+
+  const bucket = admin.storage().bucket(object.bucket);
+  const fileName = path.basename(filePath);
+  const fileDir = path.dirname(filePath);
+
+  // Define temporary file paths on the Cloud Function container
+  const tempFilePath = path.join(os.tmpdir(), fileName);
+  const thumbFileName = `thumb_${fileName}`;
+  const tempThumbPath = path.join(os.tmpdir(), thumbFileName);
+
+  try {
+    // 1. Download the original image from Firebase Storage to the temporary directory
+    console.log(`Downloading ${fileName} for compression...`);
+    await bucket.file(filePath).download({ destination: tempFilePath });
+
+    // 2. Compress and resize the image using 'sharp'
+    console.log(`Compressing ${fileName}...`);
+    await sharp(tempFilePath)
+      .resize(800, 800, { fit: 'inside', withoutEnlargement: true }) // Max 800x800
+      .jpeg({ quality: 80 }) // 80% quality JPEG compression
+      .toFile(tempThumbPath);
+
+    // 3. Upload the compressed thumbnail back to Firebase Storage
+    const thumbStoragePath = path.join(fileDir, thumbFileName).replace(/\\/g, '/'); // Ensure forward slashes
+    console.log(`Uploading compressed image to ${thumbStoragePath}...`);
+    await bucket.upload(tempThumbPath, {
+      destination: thumbStoragePath,
+      metadata: { contentType: 'image/jpeg' }
+    });
+
+    // 4. Clean up the temporary files to prevent memory leaks
+    fs.unlinkSync(tempFilePath);
+    fs.unlinkSync(tempThumbPath);
+
+    console.log('Compression successful!');
+  } catch (error) {
+    console.error('Error compressing image:', error);
+    // Clean up in case of error
+    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+    if (fs.existsSync(tempThumbPath)) fs.unlinkSync(tempThumbPath);
+  }
 
   return null;
 });
