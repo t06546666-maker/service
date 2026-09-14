@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../firebase';
 import './AIAssistant.css';
 
 export default function AIAssistant() {
@@ -26,23 +27,10 @@ export default function AIAssistant() {
     setIsLoading(true);
 
     try {
-      // Initialize the Gemini model using Google AI Studio API Key
-      const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
-      // System instructions to guide the model's behavior
-      const prompt = `You are a helpful assistant for a Home Services app. 
-      A user is going to describe a problem in their home. 
-      Your job is to:
-      1. Briefly diagnose what the likely issue is.
-      2. Tell them exactly what kind of professional they need to hire (e.g., Plumber, Electrician, Carpenter).
-      Keep your response friendly, concise, and under 3 sentences.
-      
-      User's problem: "${userText}"`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      // Call the secure backend function
+      const askAIAssistant = httpsCallable(functions, 'askAIAssistant');
+      const result = await askAIAssistant({ message: userText });
+      const text = result.data.response;
 
       setMessages(prev => [...prev, { role: 'assistant', text }]);
     } catch (error) {

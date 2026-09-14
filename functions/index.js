@@ -1,7 +1,11 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const { defineSecret } = require('firebase-functions/params');
 
 admin.initializeApp();
+
+// Define the Google AI Studio Secret
+const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
 // Trigger when a new document is added to the "notifications" collection
 exports.sendPushNotification = functions.firestore
@@ -99,6 +103,44 @@ exports.myCallableFunction = functions.https.onCall(async (data, context) => {
   }
 });
 
+// Callable Function: Securely connect to Google AI Studio using Secret Manager
+exports.askAIAssistant = functions.runWith({ secrets: [geminiApiKey] }).https.onCall(async (data, context) => {
+  // Optional: Enforce authentication (uncomment if you only want logged-in users to use the AI)
+  // if (!context.auth) {
+  //   throw new functions.https.HttpsError('unauthenticated', 'You must be logged in to use the AI.');
+  // }
+
+  const userMessage = data.message;
+  if (!userMessage) {
+    throw new functions.https.HttpsError('invalid-argument', 'Message is required.');
+  }
+
+  try {
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    
+    // Retrieve the secure key from Secret Manager at runtime!
+    const genAI = new GoogleGenerativeAI(geminiApiKey.value());
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `You are a helpful assistant for a Home Services app. 
+      A user is going to describe a problem in their home. 
+      Your job is to:
+      1. Briefly diagnose what the likely issue is.
+      2. Tell them exactly what kind of professional they need to hire (e.g., Plumber, Electrician, Carpenter).
+      Keep your response friendly, concise, and under 3 sentences.
+      
+      User's problem: "${userMessage}"`;
+
+    const result = await model.generateContent(prompt);
+    const text = await result.response.text();
+
+    return { response: text };
+  } catch (error) {
+    console.error("AI Generation Error:", error);
+    throw new functions.https.HttpsError('internal', 'AI is currently unavailable. Check your Secret Manager API key.');
+  }
+});
+
 // Example of a Firebase Auth Trigger (Runs automatically when a user signs up)
 exports.onUserCreated = functions.auth.user().onCreate(async (user) => {
   const uid = user.uid;
@@ -182,10 +224,9 @@ exports.onImageUploaded = functions.storage.object().onFinalize(async (object) =
     return null;
   }
 
-  // If you are generating a thumbnail, it will re-upload to Storage, which triggers this function again!
-  // To prevent an infinite loop, you must exit if the file is already a thumbnail:
-  if (filePath.includes('thumb_')) {
-    console.log('Already a thumbnail. Skipping.');
+  // To prevent an infinite loop, you must exit if the file has already been compressed
+  if (object.metadata && object.metadata.compressed === 'true') {
+    console.log('Image is already compressed. Skipping.');
     return null;
   }
 
@@ -196,12 +237,11 @@ exports.onImageUploaded = functions.storage.object().onFinalize(async (object) =
 
   const bucket = admin.storage().bucket(object.bucket);
   const fileName = path.basename(filePath);
-  const fileDir = path.dirname(filePath);
 
   // Define temporary file paths on the Cloud Function container
   const tempFilePath = path.join(os.tmpdir(), fileName);
-  const thumbFileName = `thumb_${fileName}`;
-  const tempThumbPath = path.join(os.tmpdir(), thumbFileName);
+  const compressedFileName = `temp_${fileName}`;
+  const tempCompressedPath = path.join(os.tmpdir(), compressedFileName);
 
   try {
     // 1. Download the original image from Firebase Storage to the temporary directory
@@ -213,26 +253,28 @@ exports.onImageUploaded = functions.storage.object().onFinalize(async (object) =
     await sharp(tempFilePath)
       .resize(800, 800, { fit: 'inside', withoutEnlargement: true }) // Max 800x800
       .jpeg({ quality: 80 }) // 80% quality JPEG compression
-      .toFile(tempThumbPath);
+      .toFile(tempCompressedPath);
 
-    // 3. Upload the compressed thumbnail back to Firebase Storage
-    const thumbStoragePath = path.join(fileDir, thumbFileName).replace(/\\/g, '/'); // Ensure forward slashes
-    console.log(`Uploading compressed image to ${thumbStoragePath}...`);
-    await bucket.upload(tempThumbPath, {
-      destination: thumbStoragePath,
-      metadata: { contentType: 'image/jpeg' }
+    // 3. Upload the compressed image back, OVERWRITING the original in Storage!
+    console.log(`Overwriting original image at ${filePath}...`);
+    await bucket.upload(tempCompressedPath, {
+      destination: filePath,
+      metadata: { 
+        contentType: 'image/jpeg',
+        metadata: { compressed: 'true' } // THIS PREVENTS THE INFINITE LOOP!
+      }
     });
 
     // 4. Clean up the temporary files to prevent memory leaks
     fs.unlinkSync(tempFilePath);
-    fs.unlinkSync(tempThumbPath);
+    fs.unlinkSync(tempCompressedPath);
 
     console.log('Compression successful!');
   } catch (error) {
     console.error('Error compressing image:', error);
     // Clean up in case of error
     if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-    if (fs.existsSync(tempThumbPath)) fs.unlinkSync(tempThumbPath);
+    if (fs.existsSync(tempCompressedPath)) fs.unlinkSync(tempCompressedPath);
   }
 
   return null;
