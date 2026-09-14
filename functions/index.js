@@ -165,3 +165,35 @@ exports.onUserDeleted = functions.auth.user().onDelete(async (user) => {
   
   return null;
 });
+
+// Example of a Firebase Storage Trigger (Runs automatically when a file is uploaded)
+exports.onImageUploaded = functions.storage.object().onFinalize(async (object) => {
+  // Get file details
+  const filePath = object.name; // e.g., 'portfolios/professional123/image.jpg'
+  const contentType = object.contentType; // e.g., 'image/jpeg'
+  const size = object.size;
+
+  console.log(`New file uploaded to Storage: ${filePath}`);
+  console.log(`Type: ${contentType} | Size: ${(size / 1024 / 1024).toFixed(2)} MB`);
+
+  // Exit if this is triggered on a file that is not an image
+  if (!contentType.startsWith('image/')) {
+    console.log('This is not an image. Skipping.');
+    return null;
+  }
+
+  // If you are generating a thumbnail, it will re-upload to Storage, which triggers this function again!
+  // To prevent an infinite loop, you must exit if the file is already a thumbnail:
+  if (filePath.includes('thumb_')) {
+    console.log('Already a thumbnail. Skipping.');
+    return null;
+  }
+
+  // --- ADD YOUR CUSTOM LOGIC HERE ---
+  // Popular things to do here:
+  // 1. Resize the image (e.g., using the 'sharp' library or ImageMagick)
+  // 2. Scan the image for inappropriate content using Google Cloud Vision API
+  // 3. Update a Firestore document to notify the frontend that processing is complete
+
+  return null;
+});
