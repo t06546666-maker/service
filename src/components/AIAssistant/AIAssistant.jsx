@@ -35,7 +35,7 @@ export default function AIAssistant() {
       setMessages(prev => [...prev, { role: 'assistant', text }]);
     } catch (error) {
       console.error("AI Error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', text: "Oops! Please make sure your Google AI Studio API Key is placed inside your .env file as REACT_APP_GEMINI_API_KEY and restart your server." }]);
+      setMessages(prev => [...prev, { role: 'assistant', text: "Oops! AI is currently unavailable. " + (error.message || "Please check your backend logs.") }]);
     } finally {
       setIsLoading(false);
     }
