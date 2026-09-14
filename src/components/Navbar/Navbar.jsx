@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Navbar.css';
 import { Link, useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, deleteUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
 
@@ -44,6 +44,27 @@ export default function Navbar() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    const isConfirmed = window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.");
+    if (isConfirmed) {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          await deleteUser(user);
+          alert("Your account has been completely deleted.");
+          navigate('/');
+        }
+      } catch (error) {
+        console.error("Error deleting account:", error);
+        if (error.code === 'auth/requires-recent-login') {
+          alert("For security reasons, you must log out and log back in right now before deleting your account.");
+        } else {
+          alert(`Failed to delete account: ${error.message}`);
+        }
+      }
+    }
+  };
+
   return (
     <nav className="homa-navbar">
         <div className="homa-nav-container">
@@ -69,6 +90,22 @@ export default function Navbar() {
               <div className="homa-profile-section">
                 <span className="homa-greeting">Hello, {userProfile.name ? userProfile.name.split(' ')[0] : 'User'}</span>
                 <button className="homa-btn-logout" onClick={handleLogout}>Logout</button>
+                <button 
+                  className="homa-btn-delete" 
+                  onClick={handleDeleteAccount}
+                  style={{
+                    backgroundColor: '#ef4444', 
+                    color: 'white', 
+                    border: 'none', 
+                    padding: '8px 12px', 
+                    borderRadius: '4px', 
+                    cursor: 'pointer', 
+                    marginLeft: '8px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Delete Account
+                </button>
               </div>
             ) : (
               <>
