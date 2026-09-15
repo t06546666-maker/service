@@ -118,9 +118,18 @@ exports.askAIAssistant = functions.runWith({ secrets: [geminiApiKey] }).https.on
   try {
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     
-    // Retrieve the secure key from Secret Manager at runtime!
-    const genAI = new GoogleGenerativeAI(geminiApiKey.value());
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Retrieve the secure key from Secret Manager at runtime
+    const apiKey = geminiApiKey.value() || process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error("API Key is missing or undefined inside the function!");
+    }
+    if (typeof apiKey !== 'string' || apiKey.length < 20) {
+      throw new Error("API Key looks invalid (too short): " + apiKey);
+    }
+    
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `You are a helpful assistant for a Home Services app. 
       A user is going to describe a problem in their home. 

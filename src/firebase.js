@@ -3,11 +3,10 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-// import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAI } from "firebase/ai";
 import { getStorage } from "firebase/storage";
 import { getMessaging } from "firebase/messaging";
-import { getFunctions } from "firebase/functions";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -45,5 +44,10 @@ const vertexAI = getAI(app);
 const storage = getStorage(app);
 const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
 const functions = getFunctions(app);
+
+// Connect to local emulator if running on localhost
+if (window.location.hostname === "localhost") {
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+}
 
 export { app, analytics, db, auth, googleProvider, vertexAI, storage, messaging, functions };
